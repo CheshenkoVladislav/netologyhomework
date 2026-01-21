@@ -1,7 +1,7 @@
 locals {
-  vm_web_name = var.vm_web_name
-  vm_db_name  = var.vm_db_name
-  interpolated = "${vm_db_name}, ${vm_web_name}"
+  vm_commom = "netology-develop-platform"
+  vm_web_name = "${vm_common}-${var.vm_web_name}"
+  vm_db_name  = "${vm_common}-${var.vm_db_name}"
 
   metadata = {
     serial-port-enable = 1
