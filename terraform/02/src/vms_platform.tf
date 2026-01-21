@@ -1,6 +1,6 @@
 variable "vm_web_name" {
   type = string
-  default = "netology-develop-platform-web"
+  default = "web"
 }
 
 variable "vm_web_platform_standard" {
@@ -30,7 +30,7 @@ variable "vm_web_zone" {
 
 variable "vm_db_name" {
   type = string
-  default = "netology-develop-platform-db"
+  default = "db"
 }
 
 variable "vm_db_platform_standard" {
