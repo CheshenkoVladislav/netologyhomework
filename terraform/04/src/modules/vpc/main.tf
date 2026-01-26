@@ -12,10 +12,11 @@ resource "yandex_vpc_network" "custom_net" {
 }
 
 resource "yandex_vpc_subnet" "custom_subnet" {
-  name           = var.subnet_name
-  zone           = var.zone
+  for_each = { for index, subnet in var.subnets : index => subnet }
+  name           = "${var.net_name}-Subnet-${each.key}"
+  zone           = each.value.zone
   network_id     = yandex_vpc_network.custom_net.id
-  v4_cidr_blocks = var.v4_cidr_blocks
+  v4_cidr_blocks = [each.value.cidr]
 }
 
 output "out" {
