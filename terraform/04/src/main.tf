@@ -1,13 +1,3 @@
-# resource "yandex_vpc_network" "develop" {
-#   name = var.vpc_name
-# }
-# resource "yandex_vpc_subnet" "develop" {
-#   name           = var.vpc_name
-#   zone           = var.default_zone
-#   network_id     = yandex_vpc_network.develop.id
-#   v4_cidr_blocks = var.default_cidr
-# }
-
 module "vpc_local" {
   net_name       = var.vpc_name
   source         = "./modules/vpc"
@@ -31,6 +21,12 @@ module "mysql_db" {
 
 module "s3_bucket" {
   source = "git::https://github.com/terraform-yc-modules/terraform-yc-s3.git?ref=1.0.4"
+  bucket_name = "b1gv6lhe0hp2uq4030l5-bucket"
+  max_size = 1000000000
+}
+
+output "s3_output" {
+  value = module.s3_bucket.bucket_name
 }
 
 output "result" {

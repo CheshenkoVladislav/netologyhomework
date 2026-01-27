@@ -6,6 +6,15 @@ output "vault_example" {
   value = nonsensitive(data.vault_generic_secret.vault_example.data).database_password #функция nonsensitive позволяет узнать значение sensitive данных
 }
 
+resource "vault_kv_secret_v2" "creds" {
+  mount = "secret"
+  name  = "accounting"
+  data_json = jsonencode(
+    {
+      password = "my-long-password",
+    }
+  )
+}
 #содержимое секретное. поглядеть можно через консоль
 
 #> data.vault_generic_secret.vault_example # а содержимое data то скрыто!
