@@ -20,5 +20,8 @@ resource "yandex_vpc_subnet" "custom_subnet" {
 }
 
 output "out" {
-  value = yandex_vpc_subnet.custom_subnet
+  value = {
+    net = yandex_vpc_network.custom_net.id
+    subnets = yandex_vpc_subnet.custom_subnet
+  }
 }

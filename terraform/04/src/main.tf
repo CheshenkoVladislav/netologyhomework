@@ -11,9 +11,33 @@
 module "vpc_local" {
   net_name       = var.vpc_name
   source         = "./modules/vpc"
-  subnets        = [
-    { zone = "ru-central1-a", cidr = "10.0.1.0/24" },
-    { zone = "ru-central1-b", cidr = "10.0.2.0/24" },
-    { zone = "ru-central1-d", cidr = "10.0.3.0/24" },
-  ]
+}
+
+module "mysql_cluster" {
+  source    = "./modules/mysql-cluster"
+  name      = "example"
+  net_id    = module.vpc_local.out.net
+  HA        = true
+
+  depends_on = [ module.vpc_local ]
+}
+
+module "mysql_db" {
+  source      = "./modules/mysql-database"
+  cluster_id  = module.mysql_cluster.out
+  db_name     = "test"
+  user_name   = "app"  
+}
+
+module "s3_bucket" {
+  source = "git::https://github.com/terraform-yc-modules/terraform-yc-s3.git?ref=1.0.4"
+}
+
+output "result" {
+  value = {
+    vpc           = module.vpc_local.out
+    mysql_cluster = module.mysql_cluster.out
+    mysql_db      = module.mysql_db.out
+  }
+  sensitive = true
 }

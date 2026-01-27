@@ -19,4 +19,5 @@ variable "subnets" {
     zone = string
     cidr = string
   }))
+  default = []
 }
