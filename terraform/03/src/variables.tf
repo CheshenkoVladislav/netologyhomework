@@ -30,3 +30,23 @@ variable "vpc_name" {
   default     = "develop"
   description = "VPC network&subnet name"
 }
+
+variable "compute_image_name" {
+  type    = string
+  default = "ubuntu-2204-lts"
+}
+
+variable "web_prefix" {
+  type = string
+  default = "web"
+}
+
+variable "cloud_config_file_name" {
+  type = string
+  default = "cloud-init.yml"
+}
+
+variable "storage_name" {
+  type = string
+  default = "storage-vm"
+}

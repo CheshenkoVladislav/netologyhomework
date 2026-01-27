@@ -14,13 +14,11 @@ locals {
       fqdn = dbRes.fqdn
     }
   ]
-  storage_list = [
-    for storageRes in yandex_compute_instance.storage : {
-      name = storageRes.name,
-      id   = storageRes.id,
-      fqdn = storageRes.fqdn
-    }
-  ]
+  storage_list = [{
+    name = yandex_compute_instance.storage.name,
+    id   = yandex_compute_instance.storage.id,
+    fqdn = yandex_compute_instance.storage.fqdn
+  }]
 
   result_list = concat(local.web_list, local.db_list, local.storage_list)
 

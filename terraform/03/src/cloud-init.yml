@@ -1,0 +1,12 @@
+#cloud-config
+users:
+  - name: vcheshenko
+    groups: sudo
+    shell: /bin/bash
+    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINLrXGUaqctNbryc8HL+qO8LlpNAoaswCUl2FYC0qQcv vcheshenko@vcheshenko-VirtualBox
+package_update: true
+package_upgrade: false
+packages:
+  - vim

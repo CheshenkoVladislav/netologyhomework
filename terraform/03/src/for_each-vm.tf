@@ -1,29 +1,35 @@
 
 variable "each_vm" {
   type = list(object({
-    vm_name     = string,
-    cpu         = number,
-    ram         = number,
-    disk_volume = number
+    vm_name       = string,
+    cpu           = number,
+    ram           = number,
+    disk_volume   = number,
+    disk_type     = string,
+    core_fraction = number
   }))
   default = [
     {
-      vm_name     = "main"
-      cpu         = 2
-      ram         = 4
-      disk_volume = 15
+      vm_name       = "main"
+      cpu           = 2
+      ram           = 4
+      disk_volume   = 15
+      disk_type     = "network-hdd"
+      core_fraction = 20
     },
     {
-      vm_name     = "replica"
-      cpu         = 4
-      ram         = 8
-      disk_volume = 12
+      vm_name       = "replica"
+      cpu           = 4
+      ram           = 8
+      disk_volume   = 12
+      disk_type     = "network-hdd"
+      core_fraction = 20
     }
   ]
 }
 
 data "yandex_compute_image" "db-image" {
-  family = "ubuntu-2204-lts"
+  family = var.compute_image_name
 }
 
 resource "yandex_compute_instance" "db" {
@@ -33,7 +39,7 @@ resource "yandex_compute_instance" "db" {
   boot_disk {
     initialize_params {
       image_id = data.yandex_compute_image.db-image.image_id
-      type     = "network-hdd"
+      type     = each.value.disk_type
       size     = each.value.disk_volume
     }
   }
@@ -45,16 +51,16 @@ resource "yandex_compute_instance" "db" {
   resources {
     cores         = each.value.cpu
     memory        = each.value.ram
-    core_fraction = 20
+    core_fraction = each.value.core_fraction
   }
   scheduling_policy {
     preemptible = true
   }
   metadata = {
-    user-data = file("${path.module}/cloud_config.yaml")
+    user-data = file("${path.module}/${var.cloud_config_file_name}")
   }
 }
 
 output "external_ip_db" {
-  value = [for k,v in yandex_compute_instance.db : "${k} : ${v.network_interface[0].nat_ip_address}"]
+  value = [for k, v in yandex_compute_instance.db : "${k} : ${v.network_interface[0].nat_ip_address}"]
 }

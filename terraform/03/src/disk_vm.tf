@@ -33,7 +33,7 @@ variable "storage_instance_config" {
 }
 
 data "yandex_compute_image" "storage_image" {
-  family = "ubuntu-2204-lts"
+  family = var.compute_image_name
 }
 
 resource "yandex_compute_disk" "hdd1tb" {
@@ -50,8 +50,7 @@ resource "yandex_compute_disk" "hdd1tb" {
 }
 
 resource "yandex_compute_instance" "storage" {
-  count = 1
-  name  = "storage-${count.index + 1}"
+  name  = var.storage_name
   boot_disk {
     initialize_params {
       image_id = data.yandex_compute_image.storage_image.image_id
@@ -79,10 +78,10 @@ resource "yandex_compute_instance" "storage" {
   }
 
   metadata = {
-    user-data = file("${path.module}/cloud_config.yaml")
+    user-data = file("${path.module}/${var.cloud_config_file_name}")
   }
 }
 
 output "external_ip_storage" {
-  value = yandex_compute_instance.storage[*].network_interface[0].nat_ip_address
+  value = yandex_compute_instance.storage.network_interface[0].nat_ip_address
 }

@@ -13,6 +13,3 @@ personal.auto.tfvars
 
 #yc account info
 service_account_key_file.json
-
-#ssh config
-cloud_config.yaml

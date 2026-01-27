@@ -1,10 +1,23 @@
 data "yandex_compute_image" "ubuntu_image" {
-  family = "ubuntu-2204-lts"
+  family = var.compute_image_name
+}
+
+variable "instance_resources" {
+  type = object({
+    cores         = number,
+    memory        = number,
+    core_fraction = number
+  })
+  default = {
+    cores         = 2
+    memory        = 2
+    core_fraction = 20
+  }
 }
 
 resource "yandex_compute_instance" "web" {
   count = 2
-  name = "web-${count.index + 1}"
+  name = "${var.web_prefix}-${count.index + 1}"
   boot_disk {
     initialize_params {
       image_id = data.yandex_compute_image.ubuntu_image.image_id
@@ -16,15 +29,15 @@ resource "yandex_compute_instance" "web" {
     security_group_ids = [yandex_vpc_security_group.example.id]
   }
   resources {
-    cores         = 2
-    memory        = 2
-    core_fraction = 20
+    cores         = var.instance_resources.cores
+    memory        = var.instance_resources.memory
+    core_fraction = var.instance_resources.core_fraction
   }
   scheduling_policy {
     preemptible = true
   }
   metadata = {
-    user-data = file("${path.module}/cloud_config.yaml")
+    user-data = file("${path.module}/${var.cloud_config_file_name}")
   }
 }
 
