@@ -10,3 +10,5 @@
 
 # own secret vars store.
 personal.auto.tfvars
+
+service_account_key_file.json
