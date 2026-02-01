@@ -18,8 +18,11 @@
 <img width="1073" height="779" alt="5" src="https://github.com/user-attachments/assets/ec2f755d-b53a-4aa8-aff6-09abbca0f24e" />
 
 # Задание 4
+https://github.com/CheshenkoVladislav/netologyhomework/pull/1
+
+# Задание 4
 <img width="812" height="232" alt="1" src="https://github.com/user-attachments/assets/635b31b5-f002-4011-b9bc-97f49b575941" />
 <img width="807" height="60" alt="2" src="https://github.com/user-attachments/assets/fea639b1-19c5-4daf-a329-b14488bbf553" />
 
-# Задание 5
+# Задание 7
 находится в папке hw7 и hw7-main
