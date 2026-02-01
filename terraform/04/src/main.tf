@@ -20,7 +20,7 @@ module "mysql_db" {
 }
 
 module "s3_bucket" {
-  source = "git::https://github.com/terraform-yc-modules/terraform-yc-s3.git?ref=1.0.4"
+  source = "git::https://github.com/terraform-yc-modules/terraform-yc-s3.git?ref=791f53698dd13ee97bc1cbe51b765f2d10f1d273"
   bucket_name = "b1gv6lhe0hp2uq4030l5-bucket"
   max_size = 1000000000
 }

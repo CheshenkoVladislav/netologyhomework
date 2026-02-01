@@ -26,6 +26,8 @@ resource "yandex_mdb_mysql_cluster" "my_cluster" {
     innodb_print_all_deadlocks    = true
   }
 
+  security_group_ids = ["enpvs3sdm11v9dvarhb4"]
+
 
   dynamic "host" {
     for_each = yandex_vpc_subnet.cluster_subnet
