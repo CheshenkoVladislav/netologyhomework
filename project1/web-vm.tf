@@ -49,7 +49,7 @@ data "yandex_compute_image" "ubuntu-2204-lts" {
 }
 
 resource "yandex_compute_instance" "web_instance" {
-  depends_on  = [null_resource.archive_webserver, yandex_mdb_mysql_database.netologia_project_1_mysql_db]
+  depends_on  = [null_resource.archive_webserver, module.mysql]
   name        = "netologia_project_1_web_instance"
   platform_id = "standard-v3"
 

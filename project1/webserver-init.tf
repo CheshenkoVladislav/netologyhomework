@@ -10,18 +10,18 @@ data "cloudinit_config" "web_init" {
 }
 
 resource "local_file" "compose_init" {
-  depends_on = [yandex_mdb_mysql_cluster.netologia_project_1_mysql_cluster]
+  depends_on = [module.mysql]
   filename   = "${path.module}/webserver_src/compose.yaml"
   content = templatefile("${path.module}/templates/compose_yc.yaml.tpl", {
-    db_host = yandex_mdb_mysql_cluster.netologia_project_1_mysql_cluster.host[0].fqdn
+    db_host = module.mysql.out.cluster_fqdn
   })
 }
 
 resource "local_file" "env" {
-  depends_on = [yandex_mdb_mysql_cluster.netologia_project_1_mysql_cluster]
+  depends_on = [module.mysql]
   filename   = "${path.module}/webserver_src/.env"
   content = templatefile("${path.module}/templates/env.tpl", {
-    mysql_db_name       = yandex_mdb_mysql_database.netologia_project_1_mysql_db.name
+    mysql_db_name       = var.mysql_db_name
     mysql_root_password = data.yandex_lockbox_secret_version.mysql_logopass.entries[1].text_value
     mysql_user          = data.yandex_lockbox_secret_version.mysql_logopass.entries[0].key
     mysql_password      = data.yandex_lockbox_secret_version.mysql_logopass.entries[0].text_value
