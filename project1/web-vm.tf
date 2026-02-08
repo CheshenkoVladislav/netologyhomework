@@ -4,17 +4,11 @@ resource "yandex_vpc_security_group" "netologia_project_1_sg" {
   network_id  = yandex_vpc_network.netologia_project_1_network.id
 
   egress {
-    description    = "MYSQL"
-    v4_cidr_blocks = ["0.0.0.0/0"]
-    protocol       = "TCP"
-    port           = 3306
-  }
-
-  egress {
-    description       = "All response"
-    protocol          = "TCP"
-    port              = 0
-    predefined_target = "self_security_group"
+    description       = "All"
+    protocol          = "ANY"
+    v4_cidr_blocks    = ["0.0.0.0/0"]
+    from_port         = 0
+    to_port           = 65535
   }
 
   ingress {
@@ -27,14 +21,7 @@ resource "yandex_vpc_security_group" "netologia_project_1_sg" {
   ingress {
     description    = "HTTP rule"
     v4_cidr_blocks = ["0.0.0.0/0"]
-    port           = 80
-    protocol       = "TCP"
-  }
-
-  ingress {
-    description    = "HTTPS rule"
-    v4_cidr_blocks = ["0.0.0.0/0"]
-    port           = 443
+    port           = 8090
     protocol       = "TCP"
   }
 
@@ -81,6 +68,7 @@ resource "yandex_compute_instance" "web_instance" {
   network_interface {
     index     = 1
     subnet_id = yandex_vpc_subnet.netologia_project_1_subnet.id
+    security_group_ids = [yandex_vpc_security_group.netologia_project_1_sg.id]
     nat       = true
   }
 
@@ -114,7 +102,7 @@ resource "yandex_compute_instance" "web_instance" {
     inline = [
       "cd ~/project && tar -xvzf archive.tar.gz && cd webserver_src",
       "cloud-init status --wait",
-      "sudo docker compose up"
+      "sudo docker compose up -d"
     ]
   }
 }
