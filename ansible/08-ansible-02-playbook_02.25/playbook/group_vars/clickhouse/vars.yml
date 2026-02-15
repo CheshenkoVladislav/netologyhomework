@@ -1,0 +1,11 @@
+---
+clickhouse_version: "22.3.3.44"
+clickhouse_packages:
+  - clickhouse-client
+  - clickhouse-server
+  - clickhouse-common-static
+dirs:
+  log_dir: "/home/vcheshenko/Documents/netologia/netologyHomework/netologyhomework/ansible/08-ansible-02-playbook_02.25/logs"
+  vector_data_dir: "/etc/vector/vector-data"
+temp_dirs:
+  temp: "/tmp"

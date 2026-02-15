@@ -1,0 +1,60 @@
+---
+- name: Install Clickhouse-vector
+  hosts: clickhouse
+  debugger: never
+  handlers:
+    - name: Start vector
+      ansible.builtin.systemd_service:
+        name: vector
+        state: restarted
+        enabled: yes
+    - name: Start clickhouse
+      docker_container:
+        name: "clickhouse-01"
+        image: "clickhouse/clickhouse-server:head-alpine"
+        state: started
+        restart_policy: always
+        volumes:
+          - "{{ dirs.log_dir }}:/var/log/clickhouse-server/"
+    - name: Clear temp files
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      with_items: "{{ temp_dirs.values() | list }}"
+  tasks:
+    - name: Create dirs
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: 'u=rwx,g=rwx,o=rwx'
+      with_items: "{{ dirs.values() | list }}"
+    - name: Create temp dirs
+      file:
+        path: "{{ item }}"
+        state: directory
+      with_items: "{{ temp_dirs.values() | list }}"
+      notify: Clear temp files
+      become: true
+    - name: Download vector deb
+      ansible.builtin.get_url:
+        url: "https://apt.vector.dev/pool/v/ve/vector_0.53.0-1_amd64.deb"
+        dest: "{{ temp_dirs.temp }}/vector.deb"
+      register: vector_deb_info
+    - name: Vector deb info
+      ansible.builtin.debug:
+        var: vector_deb_info
+    - name: Install vector
+      ansible.builtin.apt:
+        deb: "{{ vector_deb_info.dest }}"
+      become: true
+    - name: Chmod vector config dir
+      ansible.builtin.command: sudo chmod -R o+rw /etc/vector
+      become: true
+    - name: Create vector config
+      template:
+        src: vector.yaml.j2
+        dest: /etc/vector/vector.yaml
+      notify: 
+        - Start vector
+        - Start clickhouse
+
