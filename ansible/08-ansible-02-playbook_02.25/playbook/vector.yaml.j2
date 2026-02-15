@@ -1,0 +1,16 @@
+data_dir: "/etc/vector/vector-data"
+
+sources:
+  clickhouse_log:
+    type:   "file"
+    include:
+      - "/home/vcheshenko/Documents/netologia/netologyHomework/netologyhomework/ansible/08-ansible-02-playbook_02.25/logs/clickhouse-server.log"
+    ignore_older_secs: 86400
+
+sinks:
+  emit_clickhouse_log:
+    inputs:
+      - "clickhouse_log"
+    type: "console"
+    encoding:
+      codec: "text"
