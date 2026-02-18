@@ -1,0 +1,103 @@
+---
+- name: Install NGINX
+  hosts: lighthouse
+  handlers:
+    - name: start nginx
+      become: true
+      command: nginx
+    - name: reload nginx
+      become: true
+      command: nginx -s reload
+  tasks:
+    - name: NGINX | Install
+      notify: start nginx
+      become: true
+      ansible.builtin.yum:
+        name: nginx
+- name: Install LIGHTHOUSE
+  hosts: lighthouse
+  handlers:
+    - name: reload nginx
+      become: true
+      command: nginx -s reload
+  pre_tasks:
+    - name: LIGHTHOUSE | Install git
+      become: true
+      ansible.builtin.package:
+        name: git
+        state: present
+  tasks:
+    - name: LIGHTHOUSE | Clone
+      become: true
+      ansible.builtin.git:
+        repo: https://github.com/VKCOM/lighthouse.git
+        dest: ~/lighthouse
+        clone: yes
+    - name: LIGHTHOUSE | Create Ngix config
+      become: true
+      notify: reload nginx
+      ansible.builtin.template:
+        src: "templates/nginx.conf.j2"
+        dest: "/etc/nginx/nginx.conf"
+- name: Install Clickhouse
+  hosts: clickhouse
+  handlers:
+    - name: Start clickhouse service
+      become: true
+      ansible.builtin.service:
+        name: clickhouse-server
+        state: restarted
+  tasks:
+    - block:
+        - name: Get clickhouse distrib
+          ansible.builtin.get_url:
+            url: "https://packages.clickhouse.com/rpm/stable/{{ item }}-{{ clickhouse_version }}.noarch.rpm"
+            dest: "./{{ item }}-{{ clickhouse_version }}.rpm"
+          with_items: "{{ clickhouse_packages }}"
+      rescue:
+        - name: Get clickhouse distrib
+          ansible.builtin.get_url:
+            url: "https://packages.clickhouse.com/rpm/stable/clickhouse-common-static-{{ clickhouse_version }}.x86_64.rpm"
+            dest: "./clickhouse-common-static-{{ clickhouse_version }}.rpm"
+    - name: Install clickhouse packages
+      become: true
+      ansible.builtin.yum:
+        disable_gpg_check: yes
+        name:
+          - clickhouse-common-static-{{ clickhouse_version }}.rpm
+          - clickhouse-client-{{ clickhouse_version }}.rpm
+          - clickhouse-server-{{ clickhouse_version }}.rpm
+      notify: Start clickhouse service
+    - name: Flush handlers
+      meta: flush_handlers
+    - name: Create database
+      ansible.builtin.command: "clickhouse-client -q 'create database logs;'"
+      register: create_db
+      failed_when: create_db.rc != 0 and create_db.rc !=82
+      changed_when: create_db.rc == 0
+- name: Install Vector
+  hosts: vector
+  handlers:
+    - name: Start vector
+      become: true
+      ansible.builtin.systemd_service:
+        name: vector
+        state: restarted
+        enabled: yes 
+  tasks:
+    - name: Get vector distrib
+      ansible.builtin.get_url:
+        url: "https://packages.timber.io/vector/0.53.0/vector-0.53.0-1.x86_64.rpm"
+        dest: /tmp/vector.rpm
+    - name: Install vector
+      become: true
+      ansible.builtin.yum:
+        disable_gpg_check: yes
+        name: /tmp/vector.rpm
+      # notify: Start vector
+    - name: Start vector
+      become: true
+      ansible.builtin.systemd_service:
+        name: vector
+        state: restarted
+        enabled: yes 
