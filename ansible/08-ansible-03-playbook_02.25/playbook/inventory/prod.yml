@@ -2,7 +2,7 @@
 clickhouse:
   hosts:
     clickhouse-01:
-      ansible_host: 130.193.44.128
+      ansible_host: 158.160.143.39
       ansible_user: ubuntu
       ansible_ssh_private_key_file: ~/.ssh/yacloud_ssh
       ansible_port: 22
@@ -12,7 +12,7 @@ clickhouse:
 vector:
   hosts:
     vector-01:
-      ansible_host: 158.160.226.106
+      ansible_host: 84.252.135.33
       ansible_user: ubuntu
       ansible_ssh_private_key_file: ~/.ssh/yacloud_ssh
       ansible_port: 22
@@ -22,7 +22,7 @@ vector:
 lighthouse:
   hosts:
     lighthouse-01:
-      ansible_host: 158.160.189.125
+      ansible_host: 158.160.142.8
       ansible_user: ubuntu
       ansible_ssh_private_key_file: ~/.ssh/yacloud_ssh
       ansible_port: 22
