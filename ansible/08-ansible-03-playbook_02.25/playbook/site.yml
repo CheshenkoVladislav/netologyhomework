@@ -1,19 +1,66 @@
 ---
-- name: Install Lighthouse
-  hosts: lighthouse
-  pre_tasks:
-    - name: LIGHTHOUSE | Install git
+- name: Prepare hosts
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Update apt cache
+      raw: apt update
+    - name: Install Python
+      raw: apt install -y python3
+    - name: Create test user ubuntu
+      ansible.builtin.user:
+        name: testuser
+        shell: /bin/bash
+        groups: sudo
+        state: present
+    - name: Install sudo
+      ansible.builtin.apt:
+        name: sudo
+        state: present
+        update_cache: yes
+    - name: Install git
       become: true
       ansible.builtin.package:
         name: git
         state: present
+    - name: Add default user sodoers ubuntu
+      raw: "echo 'testuser ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers"
+    - name: Install for clickhouse hosts
+      ansible.builtin.apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+- name: Prepare clickhouse
+  hosts: clickhouse
+  gather_facts: false
+  tasks:
+    - name: Install for clickhouse hosts
+      ansible.builtin.apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+- name: Install Lighthouse
+  hosts: lighthouse
+  user: testuser
   roles:
-    - name: lighthouse
+    - role: lighthouse-role
 - name: Install Clickhouse
   hosts: clickhouse
+  user: testuser
+  pre_tasks:
+   - name: LIGHTHOUSE | Install git
+     become: true
+     ansible.builtin.package:
+       name: git
+       state: present
   roles:
-    - name: clickhouse
+    - role: clickhouse
 - name: Install Clickhouse
-  hosts: vector
+  hosts: clickhouse
+  user: testuser
   roles:
-    - name: vector
+    - role: vector-role

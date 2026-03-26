@@ -1,1 +1,3 @@
 .vscode
+monitoring/grafana-prometheus/grafana
+monitoring/grafana-prometheus/prometheus
