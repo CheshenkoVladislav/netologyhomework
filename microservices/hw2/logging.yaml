@@ -1,0 +1,46 @@
+volumes:
+  esdata:
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    expose:
+      - 9200
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.9
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=admin
+      - ELASTICSEARCH_PASSWORD=qwerty1234
+    ports:
+      - "8081:5601"
+    depends_on:
+      - elasticsearch
+
+  vector:
+    image: timberio/vector:latest-alpine
+    container_name: vector
+    volumes:
+      - ./vector.yaml:/etc/vector/vector.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      # Главное для Windows: указываем Vector'у, где находится Docker
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    command: ["--config", "/etc/vector/vector.yaml"]
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped

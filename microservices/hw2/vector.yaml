@@ -1,0 +1,51 @@
+sources:
+  # Источник: логи из Docker
+  docker_logs:
+    type: docker_logs
+    # Хост необязательно указывать здесь, он будет взят из переменной окружения DOCKER_HOST
+    
+    # --- Фильтрация контейнеров ---
+    # Явно указываем, с каких контейнеров собирать логи
+    include_containers:
+      - "storage"
+      - "createbuckets"
+      - "uploader"
+      - "security"
+    # Обязательно исключаем сам Vector и Elasticsearch, чтобы не зациклить сбор
+    exclude_containers:
+      - "vector"
+      - "elasticsearch"
+      - "kibana"
+    # Склеиваем разорванные Docker'ом длинные строки
+    auto_partial_merge: true
+
+transforms:
+  prepare_logs:
+    type: remap
+    inputs:
+      - docker_logs
+    source: |
+      .processed_at = now()
+      .service_name = get(.labels, ["service"]) ?? .container_name
+      del(.label)
+      
+sinks:
+  my_sink_id:
+    type: elasticsearch
+    inputs:
+      - prepare_logs
+    api_version: auto
+    compression: none
+    doc_type: _doc
+    endpoints:
+      - http://elasticsearch:9200
+    id_key: id
+    mode: bulk
+
+  # Для отладки (опционально): выводим логи в консоль Vector
+  debug_console:
+    type: console
+    inputs:
+      - prepare_logs
+    encoding:
+      codec: "json"
