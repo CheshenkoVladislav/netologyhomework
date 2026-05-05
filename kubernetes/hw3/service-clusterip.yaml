@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  type: ClusterIP
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP
+      name: nginx
+      port: 9376
+      targetPort: 80
+    - protocol: TCP
+      name: multitool
+      port: 9377
+      targetPort: 8080
