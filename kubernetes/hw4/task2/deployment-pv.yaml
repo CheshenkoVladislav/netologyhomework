@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      # securityContext:
+      #   runAsUser: 1000
+      #   runAsGroup: 1000
+      #   fsGroup: 1000
+      volumes:
+        - name: test-volume
+          persistentVolumeClaim:
+            claimName: mypvc
+      containers:
+      - name: busybox
+        image: busybox:latest
+        # command: ["sleep", "infinity"]
+        command: ["sh", "-c", "while true; do echo test > /etc/test/test; sleep 5; done"]
+        volumeMounts:
+          - name: test-volume
+            mountPath: /etc/test
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+      - name: multitool
+        image: wbitt/network-multitool:latest
+        volumeMounts:
+          - name: test-volume
+            mountPath: /etc/test
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"

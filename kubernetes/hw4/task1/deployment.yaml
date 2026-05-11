@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      volumes:
+        - name: test-volume
+          emptyDir: {}
+      containers:
+      - name: busybox
+        image: busybox:latest
+        # command: ["sleep", "infinity"]
+        command: ["sh", "-c", "while true; do echo test > /etc/test/test; sleep 5; done"]
+        volumeMounts:
+          - name: test-volume
+            mountPath: /etc/test
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+      - name: multitool
+        image: wbitt/network-multitool:latest
+        volumeMounts:
+          - name: test-volume
+            mountPath: /etc/test
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+
+      

@@ -1,0 +1,41 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: mysc
+provisioner: kubernetes.io/no-provisioner # ИНФОРМАЦИЯ: Нет автоматического развёртывания
+volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mypv
+spec:
+  capacity:
+    storage: 500Ki
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: mysc
+  local:
+    path: /home/vladislav/hw/netologyhomework/kubernetes/hw4/task3/test
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values: ["vladislav-virtualbox"]
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mypvc
+spec:
+  resources:
+    requests:
+      storage: 500Ki
+  volumeMode: Filesystem
+  storageClassName: mysc
+  accessModes:
+    - ReadWriteOnce
