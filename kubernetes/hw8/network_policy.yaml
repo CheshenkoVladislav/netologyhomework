@@ -1,0 +1,99 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: all-kube-dns
+  namespace: default
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  - to:
+    - ipBlock:
+        cidr: 169.254.25.10/32
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend-to-backend
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: frontend
+  policyTypes:
+  - Egress
+  ingress:
+  - {}
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: backend
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-backend-to-cache
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: backend
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from: 
+    - podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+    - protocol: TCP
+      port: 8082
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: cache
+    ports:
+    - protocol: TCP
+      port: 8081
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-cache-to-backend
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: cache
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from: 
+    - podSelector:
+        matchLabels:
+          app: backend
+    ports:
+    - protocol: TCP
+      port: 8081
