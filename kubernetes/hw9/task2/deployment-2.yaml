@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-2-config
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Kubernetes NGINX</title>
+        <style>body { font-family: sans-serif; text-align: center; margin-top: 10%; }</style>
+    </head>
+    <body>
+        <h1>Hello from Kubernetes ConfigMap! version 2</h1>
+    </body>
+    </html>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-2
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-2
+  template:
+    metadata:
+      labels:
+        app: nginx-2
+    spec:
+      volumes:
+        - name: config-map
+          configMap:
+            name: nginx-2-config
+      containers:
+      - name: nginx
+        image: nginx:1.19.0
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "500m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: config-map
+          mountPath: /usr/share/nginx/html
+          
