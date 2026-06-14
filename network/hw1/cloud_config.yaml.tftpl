@@ -10,3 +10,12 @@ users:
 ssh_pwauth: false
 # Отключаем вопросы при первом входе
 disable_root: true
+
+write_files:
+  - path: /var/www/html/index.html
+    permissions: "0644"
+    content: | 
+      ${index}
+
+# runcmd:
+#   - [systemctl, reload, apache2]
