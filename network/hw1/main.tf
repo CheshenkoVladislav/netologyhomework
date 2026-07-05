@@ -25,6 +25,20 @@ resource "yandex_vpc_subnet" "public" {
   v4_cidr_blocks = ["192.168.10.0/24"]
 }
 
+resource "yandex_vpc_subnet" "public-central1-b" {
+  name           = "public-central1-b"
+  zone           = "ru-central1-b"
+  network_id     = yandex_vpc_network.network.id
+  v4_cidr_blocks = ["192.168.11.0/24"]
+}
+
+resource "yandex_vpc_subnet" "public-central1-d" {
+  name           = "public-central1-d"
+  zone           = "ru-central1-d"
+  network_id     = yandex_vpc_network.network.id
+  v4_cidr_blocks = ["192.168.12.0/24"]
+}
+
 resource "yandex_vpc_subnet" "private" {
   name           = "private"
   zone           = "ru-central1-a"
@@ -52,31 +66,31 @@ resource "yandex_vpc_subnet" "private-central-b" {
 #   }
 # }
 
-resource "yandex_compute_instance" "nat-instance" {
-  name        = "nat-instance"
-  platform_id = "standard-v3"
-  boot_disk {
-    initialize_params {
-      image_id = "fd80mrhj8fl2oe87o4e1"
-    }
-  }
-  network_interface {
-    subnet_id  = yandex_vpc_subnet.public.id
-    ip_address = "192.168.10.254"
-    nat        = true
-  }
-  resources {
-    cores         = 2
-    memory        = 2
-    core_fraction = 20
-  }
-  scheduling_policy {
-    preemptible = true
-  }
-  metadata = {
-    user-data = file("${path.module}/cloud_config.yaml")
-  }
-}
+# resource "yandex_compute_instance" "nat-instance" {
+#   name        = "nat-instance"
+#   platform_id = "standard-v3"
+#   boot_disk {
+#     initialize_params {
+#       image_id = "fd80mrhj8fl2oe87o4e1"
+#     }
+#   }
+#   network_interface {
+#     subnet_id  = yandex_vpc_subnet.public.id
+#     ip_address = "192.168.10.254"
+#     nat        = true
+#   }
+#   resources {
+#     cores         = 2
+#     memory        = 2
+#     core_fraction = 20
+#   }
+#   scheduling_policy {
+#     preemptible = true
+#   }
+#   metadata = {
+#     user-data = file("${path.module}/cloud_config.yaml")
+#   }
+# }
 
 # resource "yandex_compute_instance" "vm1" {
 #   name                      = "vm-1"
@@ -126,28 +140,28 @@ resource "yandex_compute_instance" "nat-instance" {
 #   content_type = "image/png"
 # }
 
-# resource "yandex_iam_service_account" "netology-service-account" {
-#   name      = "netology-service"
-#   folder_id = var.folder_id
-# }
+resource "yandex_iam_service_account" "netology-service-account" {
+  name      = "netology-service"
+  folder_id = var.folder_id
+}
 
-# resource "yandex_iam_service_account_iam_binding" "sa-binding" {
-#   service_account_id = yandex_iam_service_account.netology-service-account.id
-#   role               = "editor"
+resource "yandex_iam_service_account_iam_binding" "sa-binding" {
+  service_account_id = yandex_iam_service_account.netology-service-account.id
+  role               = "editor"
 
-#   members = [
-#     "userAccount:ajecb53h59k74p604p0o"
-#   ]
-# }
+  members = [
+    "userAccount:ajecb53h59k74p604p0o"
+  ]
+}
 
-# resource "yandex_resourcemanager_folder_iam_binding" "folder-editor-binding" {
-#   folder_id = var.folder_id
-#   role      = "editor"
+resource "yandex_resourcemanager_folder_iam_binding" "folder-editor-binding" {
+  folder_id = var.folder_id
+  role      = "editor"
 
-#   members = [
-#     "serviceAccount:${yandex_iam_service_account.netology-service-account.id}",
-#   ]
-# }
+  members = [
+    "serviceAccount:${yandex_iam_service_account.netology-service-account.id}",
+  ]
+}
 
 # Instance Group
 # resource "yandex_compute_instance_group" "web" {
