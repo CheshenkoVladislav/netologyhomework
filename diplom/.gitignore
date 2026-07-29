@@ -2,3 +2,6 @@
 *.tfvars
 *.tfstate.backup
 *.terraform*
+test.txt
+gwin-chart
+prepare.json

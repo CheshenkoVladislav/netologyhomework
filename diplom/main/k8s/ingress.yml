@@ -1,0 +1,37 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: monitoring-ingress
+  namespace: monitoring
+  annotations: 
+    gwin.yandex.cloud/subnets: "e9bp68bd9vvc4791j96s,e2lqmm42dogju5l72pok,fl8codelsp6au8q3q284"
+    # `groupName` is required.
+    gwin.yandex.cloud/groupName: "my-ingress-group"  # group multiple ingresses to single Balancer
+    gwin.yandex.cloud/externalIPv4Address: "auto"  # external IPv4 address
+    # WebSocket support
+    gwin.yandex.cloud/backend-timeout: "300s"           # Длинный таймаут для WebSocket
+    gwin.yandex.cloud/use-proxy-protocol: "false"       # Отключаем proxy protocol
+    
+    # Таймауты для долгих соединений
+    gwin.yandex.cloud/idle-timeout: "300s"              # Idle timeout для keep-alive
+    gwin.yandex.cloud/request-timeout: "300s"
+    # Healthcheck
+    gwin.yandex.cloud/rules.backends.hc.timeout: "5s"  # health check timeout
+    gwin.yandex.cloud/rules.backends.hc.interval: "15s"  # check interval
+    gwin.yandex.cloud/rules.backends.hc.healthyThreshold: "1"  # checks to mark healthy
+    gwin.yandex.cloud/rules.backends.hc.unhealthyThreshold: "5"  # checks to mark unhealthy
+    gwin.yandex.cloud/rules.backends.hc.port: "31157"  # health check port
+    gwin.yandex.cloud/rules.backends.hc.http.path: "/api/health"
+      # HTTP health check path
+spec:
+  ingressClassName: gwin-default  # use Gwin ingress class
+  rules:
+    - http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 3000

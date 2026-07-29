@@ -9,3 +9,7 @@ variable "cloud_id" {
 variable "folder_id" {
   type = string
 }
+
+variable "service_account_id" {
+  type = string
+}
